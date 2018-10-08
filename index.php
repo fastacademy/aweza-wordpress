@@ -12,10 +12,12 @@ Author: FastAcademy
 Version: 1.0
 Author URI: http://fastacademy.co.za/
 */
+
 define('AWEZA_PLUGIN_NAME', 'aweza-wordpress');
 define('AWEZA_POPUP_VERSION', '3.0.2');
 
-function enqueue_aweza_scripts() {
+function enqueue_aweza_scripts()
+{
     wp_enqueue_style(
         'aweza-popup',
         plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-popup.min.css',
@@ -28,27 +30,30 @@ function enqueue_aweza_scripts() {
         [],
         AWEZA_POPUP_VERSION
     );
+}
 
+function enqueue_aweza_inline()
+{
     $aweza_api_key = json_encode(get_option('aweza_options')['aweza_key']);
     $aweza_api_secret = json_encode(get_option('aweza_options')['aweza_secret']);
     $aweza_prefer_lang = json_encode(get_option('aweza_options')['aweza_prefer_lang']);
-
-    $aweza_popup_init = <<<SCRIPT
-window.addEventListener('load', function() {
-  window.AwezaPopup({
-    headers: {
-      'AWEZA-KEY': $aweza_api_key,
-      'AWEZA-SECRET': $aweza_api_secret
-    },
-    preferLang: $aweza_prefer_lang
-  })
-})
-SCRIPT;
-
-    wp_add_inline_script('aweza-popup-init', $aweza_popup_init);
+    ?>
+  <script>
+    window.addEventListener('load', function () {
+      window.AwezaPopup({
+        headers: {
+          'AWEZA-KEY': <?= $aweza_api_key ?>,
+          'AWEZA-SECRET': <?= $aweza_api_secret ?>,
+        },
+        preferLang: <?= $aweza_prefer_lang ?>,
+      })
+    })
+  </script>
+    <?php
 }
 
 add_action('wp_enqueue_scripts', 'enqueue_aweza_scripts');
+add_action('wp_head', 'enqueue_aweza_inline');
 
 class Aweza_Settings
 {
@@ -93,7 +98,7 @@ class Aweza_Settings
 
         self::add_setting_field(
             'aweza_prefer_lang',
-            'Prefer Lang',
+            'Prefer Language',
             [self::class, 'render_prefer_lang_field'],
             $section_slug
         );
@@ -104,7 +109,7 @@ class Aweza_Settings
     {
         ?>
       <div class="wrap">
-        <h1><?= esc_html(get_admin_page_title()); ?></h1>
+        <img style="margin-left: 10px; margin-top: 10px;" src="<?= plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-logo.png' ?>"/>
         <form action="options.php" method="post">
             <?php
             settings_fields(self::$option_group);
@@ -118,7 +123,7 @@ class Aweza_Settings
 
     public static function render_popup_section_heading()
     {
-        echo 'Customise the Popup\'s behaviour.';
+        echo 'Customise the popup\'s behaviour.';
     }
 
     public static function render_auth_section_heading()
@@ -168,6 +173,7 @@ class Aweza_Settings
         );
     }
 }
+
 add_action('admin_init', ['Aweza_Settings', 'register']);
 
 class Aweza_Menus
@@ -188,8 +194,6 @@ class Aweza_Menus
             self::$render_cb
         );
     }
-
-
 }
 
 add_action('admin_menu', ['Aweza_Menus', 'add_options_page']);
