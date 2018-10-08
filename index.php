@@ -15,37 +15,40 @@ Author URI: http://fastacademy.co.za/
 define('AWEZA_PLUGIN_NAME', 'aweza-wordpress');
 define('AWEZA_POPUP_VERSION', '3.0.2');
 
-wp_enqueue_style(
-    'aweza-popup-css',
-    plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-popup.min.css',
-    [],
-    AWEZA_POPUP_VERSION
-);
-wp_enqueue_script(
-    'aweza-popup-js',
-    plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-popup.min.js',
-    [],
-    AWEZA_POPUP_VERSION
-);
+function enqueue_aweza_scripts() {
+    wp_enqueue_style(
+        'aweza-popup',
+        plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-popup.min.css',
+        [],
+        AWEZA_POPUP_VERSION
+    );
+    wp_enqueue_script(
+        'aweza-popup',
+        plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-popup.min.js',
+        [],
+        AWEZA_POPUP_VERSION
+    );
 
-$aweza_api_key = json_encode(get_option('aweza_options')['aweza_key']);
-$aweza_api_secret = json_encode(get_option('aweza_options')['aweza_secret']);
-$aweza_popup_init = <<<SCRIPT
+    $aweza_api_key = json_encode(get_option('aweza_options')['aweza_key']);
+    $aweza_api_secret = json_encode(get_option('aweza_options')['aweza_secret']);
+    $aweza_prefer_lang = json_encode(get_option('aweza_options')['aweza_prefer_lang']);
+
+    $aweza_popup_init = <<<SCRIPT
 window.addEventListener('load', function() {
   window.AwezaPopup({
     headers: {
       'AWEZA-KEY': $aweza_api_key,
-      'AWEZA-SECRET': $aweza_api_key
+      'AWEZA-SECRET': $aweza_api_secret
     },
-    preferLang: 'af'
+    preferLang: $aweza_prefer_lang
   })
 })
 SCRIPT;
 
-wp_add_inline_script('aweza-popup-init', $aweza_popup_init);
+    wp_add_inline_script('aweza-popup-init', $aweza_popup_init);
+}
 
-add_action('admin_init', ['Aweza_Settings', 'register']);
-add_action('admin_menu', ['Aweza_Menus', 'add_options_page']);
+add_action('wp_enqueue_scripts', 'enqueue_aweza_scripts');
 
 class Aweza_Settings
 {
@@ -165,7 +168,7 @@ class Aweza_Settings
         );
     }
 }
-
+add_action('admin_init', ['Aweza_Settings', 'register']);
 
 class Aweza_Menus
 {
@@ -189,3 +192,4 @@ class Aweza_Menus
 
 }
 
+add_action('admin_menu', ['Aweza_Menus', 'add_options_page']);
