@@ -2,16 +2,20 @@
 /**
  * @package aweza-wordpress
  * @version 1.0
+ * @wordpress-plugin
+ * Plugin Name: Aweza
+ * Plugin URI: https://github.com/fastacademy/aweza-wordpress
+ * Description: The official Aweza plugin for WordPress.
+ * Author: FastAcademy
+ * Version: 1.0
+ * Author URI: http://fastacademy.co.za/
  */
 
-/*
-Plugin Name: Aweza
-Plugin URI: https://github.com/fastacademy/aweza-wordpress
-Description: The official Aweza plugin for WordPress.
-Author: FastAcademy
-Version: 1.0
-Author URI: http://fastacademy.co.za/
-*/
+require 'fetch-term.php';
+
+if (!defined('WPINC')) {
+    die('Direct access not allowed.');
+}
 
 define('AWEZA_PLUGIN_NAME', 'aweza-wordpress');
 define('AWEZA_POPUP_VERSION', '3.0.2');
@@ -34,18 +38,13 @@ function enqueue_aweza_scripts()
 
 function enqueue_aweza_inline()
 {
-    $aweza_api_key = json_encode(get_option('aweza_options')['aweza_key']);
-    $aweza_api_secret = json_encode(get_option('aweza_options')['aweza_secret']);
     $aweza_prefer_lang = json_encode(get_option('aweza_options')['aweza_prefer_lang']);
     ?>
   <script>
     window.addEventListener('load', function () {
       window.AwezaPopup({
-        headers: {
-          'AWEZA-KEY': <?= $aweza_api_key ?>,
-          'AWEZA-SECRET': <?= $aweza_api_secret ?>,
-        },
         preferLang: <?= $aweza_prefer_lang ?>,
+        dataUrl: '<?php get_site_url(); ?>/aweza/term'
       })
     })
   </script>
@@ -109,7 +108,8 @@ class Aweza_Settings
     {
         ?>
       <div class="wrap">
-        <img style="margin-left: 10px; margin-top: 10px;" src="<?= plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-logo.png' ?>"/>
+        <img style="margin-left: 10px; margin-top: 10px;"
+             src="<?= plugins_url(AWEZA_PLUGIN_NAME) . '/assets/aweza-logo.png' ?>"/>
         <form action="options.php" method="post">
             <?php
             settings_fields(self::$option_group);
