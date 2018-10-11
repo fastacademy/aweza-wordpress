@@ -18,10 +18,12 @@ add_filter('query_vars', 'add_aweza_term_query_vars');
 
 function add_aweza_term_rewrite_rule()
 {
-    add_rewrite_rule(
-        '^aweza/term/([0-9]+)?',
-        'index.php?aweza_term=$matches[1]',
-        'top');
+    if (wp_get_current_user()->exists()) {
+        add_rewrite_rule(
+            '^aweza/term/([0-9]+)?',
+            'index.php?aweza_term=$matches[1]',
+            'top');
+    }
 }
 
 add_action('init', 'add_aweza_term_rewrite_rule');
@@ -31,7 +33,6 @@ function aweza_term_request($wp)
     if (!empty($wp->query_vars['aweza_term'])) {
         $term_id = $wp->query_vars['aweza_term'];
 
-        header('Content-Type: application/json');
         aweza_fetch_term($term_id);
         exit;
     }
@@ -39,6 +40,12 @@ function aweza_term_request($wp)
 
 function aweza_fetch_term($term_id)
 {
+
+    header('Content-Type: application/json');
+    if (!is_user_logged_in()) {
+        status_header(401);
+        die(json_encode(['error' => 'Not logged into WordPress']));
+    }
     $key = get_option('aweza_options')['aweza_key'];
     $secret = get_option('aweza_options')['aweza_secret'];
     $curl = curl_init();
