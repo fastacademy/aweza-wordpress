@@ -18,7 +18,7 @@ if (!defined('WPINC')) {
 }
 
 define('AWEZA_PLUGIN_NAME', 'aweza-wordpress');
-define('AWEZA_POPUP_VERSION', '3.0.2');
+define('AWEZA_POPUP_VERSION', '3.1.0');
 
 function enqueue_aweza_scripts()
 {
@@ -197,3 +197,4 @@ class Aweza_Menus
 }
 
 add_action('admin_menu', ['Aweza_Menus', 'add_options_page']);
+
